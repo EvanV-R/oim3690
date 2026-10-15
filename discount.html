@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Member Discount Calculator</title>
+</head>
+<body>
+  <h1>Member Discount Calculator</h1>
+
+  <label>Cart Total ($):</label>
+  <input type="number" id="total" value="150">
+
+  <br><br>
+
+  <label>
+    <input type="checkbox" id="member">
+    I am a member
+  </label>
+
+  <br><br>
+
+  <button onclick="calculate()">Calculate Discount</button>
+
+  <h2 id="result"></h2>
+
+  <script>
+    function getDiscount(total, isMember) {
+      if (total >= 100 && isMember) {
+        return 20;
+      } else if (total >= 100 || isMember) {
+        return 10;
+      } else {
+        return 0;
+      }
+    }
+
+    function calculate() {
+      let total = Number(document.getElementById("total").value);
+      let isMember = document.getElementById("member").checked;
+
+      let discount = getDiscount(total, isMember);
+      let finalPrice = total - discount;
+
+      document.getElementById("result").innerText =
+        "Discount: $" + discount +
+        " | Final Price: $" + finalPrice;
+    }
+  </script>
+</body>
+</html>
