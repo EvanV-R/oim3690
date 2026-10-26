@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Temperature Converter</title>
+</head>
+<body>
+  <h1>Temperature Converter</h1>
+
+  <label for="celsius">Temperature in Celsius:</label>
+  <input type="number" id="celsius" step="any">
+
+  <button id="convertBtn">Convert</button>
+
+  <p id="result"></p>
+
+  <script>
+    function toFahrenheit(celsius) {
+      return (celsius * 9 / 5) + 32;
+    }
+
+    document.getElementById("convertBtn").addEventListener("click", function() {
+      const input = document.getElementById("celsius");
+      const result = document.getElementById("result");
+
+      if (input.value.trim() === "") {
+        result.textContent = "Please enter a temperature.";
+        return;
+      }
+
+      const celsius = Number(input.value);
+      const fahrenheit = toFahrenheit(celsius);
+
+      result.textContent =
+        celsius + "°C = " + fahrenheit.toFixed(1) + "°F";
+    });
+  </script>
+</body>
+</html>
