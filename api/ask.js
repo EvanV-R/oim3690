@@ -1,21 +1,77 @@
-// Vercel serverless function. Add OPENROUTER_API_KEY in Vercel project settings.
-// Do not commit your key to GitHub.
+
 module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST.' });
-  const question = typeof req.body?.question === 'string' ? req.body.question.trim() : '';
-  if (!question || question.length > 2000) return res.status(400).json({ error: 'Enter a question up to 2000 characters.' });
-  const key = process.env.OPENROUTER_API_KEY;
-  if (!key) return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY environment variable in Vercel.' });
-  try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini', messages: [{ role: 'user', content: question }] })
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return res.status(405).json({
+      error: 'Method not allowed'
     });
+  }
+
+  // Get the question from the webpage
+  const question = req.body?.question;
+
+  if (typeof question !== 'string' ||
+      !question.trim() ||
+      question.length > 2000) {
+    return res.status(400).json({
+      error: 'Please enter a valid question.'
+    });
+  }
+
+  // API key is stored securely in Vercel
+  const apiKey = process.env.OPENROUTER_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({
+      error: 'Missing OpenRouter API key.'
+    });
+  }
+
+  try {
+    const response = await fetch(
+      'https://openrouter.ai/api/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'deepseek/deepseek-v4.1-flash-1017',
+          messages: [
+            {
+              role: 'user',
+              content: question.trim()
+            }
+          ]
+        })
+      }
+    );
+
     const data = await response.json();
-    if (!response.ok) return res.status(502).json({ error: data.error?.message || `Model API returned ${response.status}` });
-    return res.status(200).json({ answer: data.choices?.[0]?.message?.content || 'No answer received.' });
+
+    if (!response.ok) {
+      return res.status(502).json({
+        error: data.error?.message ||
+          'OpenRouter request failed.'
+      });
+    }
+
+    const answer = data.choices?.[0]?.message?.content;
+
+    if (!answer) {
+      return res.status(502).json({
+        error: 'No answer received from the AI.'
+      });
+    }
+
+    return res.status(200).json({
+      answer: answer
+    });
+
   } catch (error) {
-    return res.status(502).json({ error: 'Could not reach the model API.' });
+    return res.status(502).json({
+      error: 'Could not connect to OpenRouter.'
+    });
   }
 };
